@@ -4,7 +4,7 @@ import pandas as pd
 
 def read_csv(csv):
     try:
-        df = pd.read_csv(csv)
-        return df
+        with pd.read_csv(csv) as df:
+            return df
     except Exception as e:
         sysexit(f"error reading the file: {e}")
