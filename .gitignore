@@ -1,2 +1,3 @@
 /cc/paths.py
 /cc/__pycache__
+*.db
