@@ -1,16 +1,17 @@
 from sys import exit as sysexit
+from pyspark.sql import DataFrame
 
-def drop_columns(df, *columns : str):
-    for column in list(columns):
-        if not isinstance(column, str):
-            sysexit("drop_columns(*columns) only takes string type as argument")
+def drop_columns(df: DataFrame, *columns : str) -> DataFrame:
     try:
         if not len(columns) == 0:
+            for column in list(columns):
+                if not isinstance(column, str):
+                    raise TypeError("*columns must only contain strings")
             print(f"Dropping columns {columns}...")
-            df = df.drop(columns=list(columns))
+            df = df.drop(*list(columns))
             print("Successfully dropped columns!")
         else:
-            print("No columns to drop")
+            print("No column to drop")
         return df
     except Exception as e:
         sysexit(f"error dropping columns: {e}")
