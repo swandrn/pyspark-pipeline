@@ -1,3 +1,4 @@
 /cc/paths.py
 /cc/__pycache__
+cc/tests/__pycache__
 *.db
