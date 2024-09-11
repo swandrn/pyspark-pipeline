@@ -1,0 +1,4 @@
+pyspark==3.5.2
+pandas==2.2.2
+SQLAlchemy==1.4.52
+apache-airflow-providers-apache-spark==4.10.0
