@@ -1,5 +1,5 @@
-/cc/paths.py
-/cc/sparkenv.py
-/cc/__pycache__
-cc/tests/__pycache__
+*/cc/paths.py
+*/cc/sparkenv.py
+*__pycache__
 *.db
+/logs/*
