@@ -3,7 +3,6 @@ from cc import sparkenv
 from cc import extract as e
 from cc import transform as t
 from cc import load as l
-from sqlalchemy import create_engine
 from pyspark.sql import SparkSession
 
 print("Creating a Spark session...")
@@ -27,10 +26,6 @@ df = df.limit(1000)
 
 df = t.drop_columns(df, 'Unnamed: 0', 'lat', 'long', 'city_pop', 'merch_lat', 'merch_long')
 
-db_name = 'credit_cards'
-print(f"Attempting to create SQLite database {db_name}...")
-engine = create_engine(f"sqlite:///{db_name}.db")
-print("SQLite database successfully created!")
-l.df_to_sql(df, engine)
+l.write_df(df, 'csv', paths.DEST_CSV)
 
 spark.stop()
