@@ -13,3 +13,11 @@ def df_to_sql(df: DataFrame, engine: Engine):
         print("Dataframe successfully inserted!")
     except Exception as e:
         sysexit(f"error loading dataframe into sqlite: {e}")
+
+def write_df(df: DataFrame, format: str, path: str) -> None:
+    try:
+        print(f"Inserting dataframe to {path}...")
+        df.write.format(format).option('header', 'true').mode('overwrite').save(path=path)
+        print("Successfully inserted!")
+    except Exception as e:
+        sysexit(f"error inserting dataframe in {path}: {e}")
