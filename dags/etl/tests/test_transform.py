@@ -5,7 +5,7 @@ from dags.etl import transform
 from dags.etl import paths
 from pyspark.sql import SparkSession
 
-class TestExtract(unittest.TestCase):
+class TestDropColumn(unittest.TestCase):
 
     @classmethod
     def setUpClass(self) -> None:
@@ -32,7 +32,7 @@ class TestExtract(unittest.TestCase):
         df_old = self.df
         df_new = transform.drop_columns(df_old, 'lat')
         self.assertIsNot(df_new, df_old)
-        self.assertEqual(len(df_new.columns), 23)
+        self.assertEqual(len(df_new.columns), 22)
         self.assertNotIn("lat", list(df_new.columns))
 
     def test_drop_columns_int(self):
@@ -74,6 +74,54 @@ class TestExtract(unittest.TestCase):
         print("Stopping PySpark...")
         self.spark.stop()
         print("Stopped!")
+
+class TestJsonToDf(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(self):
+        self.user_json = extract.call_random_user('https://randomuser.me/api/1.4/?exc=id')
+
+    def test_user_json_to_df(self):
+        json = self.user_json
+        df = transform.user_json_to_df(json)
+        transformed_cols = {
+            'gender',
+            'name_title',
+            'first_name',
+            'last_name',
+            'street_number',
+            'street_name',
+            'city',
+            'state',
+            'country',
+            'postcode',
+            'long',
+            'lat',
+            'timezone_offset',
+            'timezone_description',
+            'email',
+            'login_uuid',
+            'username',
+            'password',
+            'login_salt',
+            'login_md5',
+            'login_sha1',
+            'login_sha256',
+            'dob',
+            'age',
+            'phone',
+            'cell',
+            'picture_large',
+            'picture_medium',
+            'picture_thumbnail',
+            'nationality',
+        }
+        self.assertTrue(list(df.columns.values).sort() == list(transformed_cols).sort())
+
+    def test_user_json_to_df_none(self):
+        with self.assertRaises(SystemExit):
+            transform.user_json_to_df(None)
+        
 
 if __name__ == '__main__':
     unittest.main()
