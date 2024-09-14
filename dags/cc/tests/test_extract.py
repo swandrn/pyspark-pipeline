@@ -1,7 +1,7 @@
 import unittest
-from cc import sparkenv
-from cc import extract
-from cc import paths
+from dags.cc import sparkenv
+from dags.cc import extract
+from dags.cc import paths
 from pyspark.sql import SparkSession, DataFrame
 
 

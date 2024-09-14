@@ -1,9 +1,9 @@
 import unittest
-from cc import sparkenv
-from cc import extract
-from cc import transform
-from cc import load
-from cc import paths
+from dags.cc import sparkenv
+from dags.cc import extract
+from dags.cc import transform
+from dags.cc import load
+from dags.cc import paths
 from pathlib import Path
 from pyspark.sql import SparkSession
 import pandas as pd
