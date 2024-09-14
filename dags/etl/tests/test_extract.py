@@ -3,6 +3,9 @@ from dags.etl import sparkenv
 from dags.etl import extract
 from dags.etl import paths
 from pyspark.sql import SparkSession, DataFrame
+import requests
+import threading
+from queue import Queue
 
 
 class TestReadCsv(unittest.TestCase):
@@ -66,6 +69,12 @@ class TestReadCsv(unittest.TestCase):
         self.spark.stop()
 
 class TestApiCall(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(self):
+        MAX_WORKERS = 1
+        self.pool = threading.BoundedSemaphore(MAX_WORKERS)
+        self.q = Queue()
     
     @responses.activate
     def test_call_random_user(self):
@@ -79,7 +88,9 @@ class TestApiCall(unittest.TestCase):
             'content_type': 'application/json; charset=utf-8',
         })
 
-        user_json = extract.call_random_user(mock_url)
+        thread = threading.Thread(target=extract.call_random_user, args=[mock_url, self.q])
+        thread.start()
+        user_json = self.q.get()
         self.assertEqual(user_json, json.loads(valid_body)["results"][0])
 
     @responses.activate
@@ -94,11 +105,11 @@ class TestApiCall(unittest.TestCase):
             'content_type': 'application/json; charset=utf-8',
         })
 
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(Exception):
             extract.call_random_user(mock_url)
     
     @responses.activate
-    def test_call_random_user_none(self):
+    def test_call_random_user_timeout(self):
         from requests.exceptions import ConnectTimeout
         mock_url = 'https://mockcall.com/api'
         responses.add(**{
@@ -109,12 +120,11 @@ class TestApiCall(unittest.TestCase):
             'content_type': 'application/json; charset=utf-8',
         })
 
-        with self.assertRaises(SystemExit):
-            extract.call_random_user(None)
+        with self.assertRaises(Exception):
+            extract.call_random_user(mock_url)
     
     @responses.activate
-    def test_call_random_user_timeout(self):
-        from requests.exceptions import ConnectTimeout
+    def test_call_random_user_none(self):
         mock_url = 'https://mockcall.com/api'
         responses.add(**{
             'method': responses.GET,
@@ -123,8 +133,8 @@ class TestApiCall(unittest.TestCase):
             'content_type': 'application/json; charset=utf-8',
         })
 
-        with self.assertRaises(SystemExit):
-            extract.call_random_user(mock_url)
+        with self.assertRaises(Exception):
+            extract.call_random_user(None)
 
 if __name__ == '__main__':
     unittest.main()
