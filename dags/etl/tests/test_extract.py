@@ -1,4 +1,4 @@
-import unittest
+import unittest, requests, responses, json
 from dags.etl import sparkenv
 from dags.etl import extract
 from dags.etl import paths
@@ -64,6 +64,65 @@ class TestExtract(unittest.TestCase):
     @classmethod
     def tearDownClass(self):
         self.spark.stop()
+
+    @responses.activate
+    def test_call_random_user(self):
+        mock_url = 'https://mockcall.com/api'
+        valid_body = '{"results":[{"gender":"female","name":{"title":"Ms","first":"Villemo","last":"Strømnes"},"location":{"street":{"number":4939,"name":"Østensjøveien"},"city":"Torhaug","state":"Sogn og Fjordane","country":"Norway","postcode":"9587","coordinates":{"latitude":"44.3646","longitude":"149.3626"},"timezone":{"offset":"+4:30","description":"Kabul"}},"email":"villemo.stromnes@example.com","login":{"uuid":"fdda7fda-7d21-4397-b855-d1355287553f","username":"goldenswan186","password":"emilio","salt":"2jdnJD0H","md5":"ad75d06f7e0beceb94363a90e1d506a6","sha1":"648d7480f32c00dab9be8445a9b3014806708e49","sha256":"f4478b524649383fc195e74d8cedbee37d8590e3ba7755d6ac3e886aee054745"},"dob":{"date":"1958-05-23T11:56:47.176Z","age":66},"registered":{"date":"2009-07-18T01:35:20.539Z","age":15},"phone":"35433291","cell":"96604993","id":{"name":"FN","value":"23055842221"},"picture":{"large":"https://randomuser.me/api/portraits/women/36.jpg","medium":"https://randomuser.me/api/portraits/med/women/36.jpg","thumbnail":"https://randomuser.me/api/portraits/thumb/women/36.jpg"},"nat":"NO"}],"info":{"seed":"96b9cbfd85aae303","results":1,"page":1,"version":"1.4"}}'
+        responses.add(**{
+            'method': responses.GET,
+            'url': mock_url,
+            'body': valid_body,
+            'status': 200,
+            'content_type': 'application/json; charset=utf-8',
+        })
+
+        user_json = extract.call_random_user(mock_url)
+        self.assertEqual(user_json, json.loads(valid_body)["results"][0])
+
+    @responses.activate
+    def test_call_random_user_not_found(self):
+        mock_url = 'https://mockcall.com/api'
+        not_found_body = 'Not Found'
+        responses.add(**{
+            'method': responses.GET,
+            'url': mock_url,
+            'body': not_found_body,
+            'status': 404,
+            'content_type': 'application/json; charset=utf-8',
+        })
+
+        with self.assertRaises(SystemExit):
+            extract.call_random_user(mock_url)
+    
+    @responses.activate
+    def test_call_random_user_none(self):
+        from requests.exceptions import ConnectTimeout
+        mock_url = 'https://mockcall.com/api'
+        responses.add(**{
+            'method': responses.GET,
+            'url': mock_url,
+            'body': ConnectTimeout(),
+            'status': 200,
+            'content_type': 'application/json; charset=utf-8',
+        })
+
+        with self.assertRaises(SystemExit):
+            extract.call_random_user(None)
+    
+    @responses.activate
+    def test_call_random_user_timeout(self):
+        from requests.exceptions import ConnectTimeout
+        mock_url = 'https://mockcall.com/api'
+        responses.add(**{
+            'method': responses.GET,
+            'url': mock_url,
+            'body': "",
+            'content_type': 'application/json; charset=utf-8',
+        })
+
+        with self.assertRaises(SystemExit):
+            extract.call_random_user(mock_url)
 
 if __name__ == '__main__':
     unittest.main()
