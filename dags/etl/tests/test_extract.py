@@ -5,7 +5,7 @@ from dags.etl import paths
 from pyspark.sql import SparkSession, DataFrame
 
 
-class TestExtract(unittest.TestCase):
+class TestReadCsv(unittest.TestCase):
 
     @classmethod
     def setUpClass(self):
@@ -65,6 +65,8 @@ class TestExtract(unittest.TestCase):
     def tearDownClass(self):
         self.spark.stop()
 
+class TestApiCall(unittest.TestCase):
+    
     @responses.activate
     def test_call_random_user(self):
         mock_url = 'https://mockcall.com/api'
