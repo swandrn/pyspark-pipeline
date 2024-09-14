@@ -1,7 +1,6 @@
 from sys import exit as sysexit
 from pyspark.sql import DataFrame
 import pandas as pd
-from dags.etl import extract
 
 def drop_columns(df: DataFrame, *columns : str) -> DataFrame:
     try:
