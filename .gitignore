@@ -1,7 +1,7 @@
 # Paths to S3 bucket and test files
-*/cc/paths.py
+*paths.py
 # AWS credentials for Spark
-*/cc/sparkenv.py
+*sparkenv.py
 *__pycache__
 *.db
 /logs/*

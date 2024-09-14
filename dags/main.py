@@ -1,8 +1,8 @@
-from cc import paths
-from cc import sparkenv
-from cc import extract as e
-from cc import transform as t
-from cc import load as l
+from etl import paths
+from etl import sparkenv
+from etl import extract as e
+from etl import transform as t
+from etl import load as l
 from pyspark.sql import SparkSession
 
 print("Creating a Spark session...")
