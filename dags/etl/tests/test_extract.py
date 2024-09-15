@@ -1,12 +1,12 @@
-import unittest, requests, responses, json
+import unittest
 from dags.etl import sparkenv
 from dags.etl import extract
 from dags.etl import paths
 from pyspark.sql import SparkSession, DataFrame
-import requests
+import responses
+import json
 import threading
 from queue import Queue
-
 
 class TestReadCsv(unittest.TestCase):
 
@@ -30,7 +30,7 @@ class TestReadCsv(unittest.TestCase):
         self.spark._jsc.hadoopConfiguration().set("fs.s3a.endpoint", "s3.eu-north-1.amazonaws.com")
 
     def test_read_csv(self):
-        self.assertIsInstance(extract.read_csv(self.spark, paths.RAW_CSV), DataFrame)
+        self.assertIsInstance(extract.read_csv(self.spark, paths.TEST_CSV), DataFrame)
 
     def test_read_csv_url(self):
         with self.assertRaises(SystemExit):
@@ -44,9 +44,6 @@ class TestReadCsv(unittest.TestCase):
     def test_read_csv_mp4(self):
         with self.assertRaises(SystemExit):
             extract.read_csv(self.spark, paths.MP4_FILE)
-
-    def test_read_csv_linux_path(self):
-        self.assertIsInstance(extract.read_csv(self.spark, paths.RAW_CSV), DataFrame)
 
     def test_read_csv_int(self):
         with self.assertRaises(SystemExit):
