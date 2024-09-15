@@ -21,11 +21,11 @@ spark._jsc.hadoopConfiguration().set("fs.s3a.impl","org.apache.hadoop.fs.s3a.S3A
 spark._jsc.hadoopConfiguration().set("fs.s3a.endpoint", "s3.eu-north-1.amazonaws.com")
 print("Configurations set!")
 
-df = e.read_csv(spark, paths.RAW_CSV)
+df = e.read_csv(spark=spark, csv=paths.RAW_CSV)
 df = df.limit(1000)
 
 df = t.drop_columns(df, 'Unnamed: 0', 'lat', 'long', 'city_pop', 'merch_lat', 'merch_long')
 
-l.write_df(df, 'csv', paths.DEST_CSV)
+l.write_df(df=df, spark=spark, format='csv', path=paths.DEST_CSV)
 
 spark.stop()
