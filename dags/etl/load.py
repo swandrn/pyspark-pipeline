@@ -1,6 +1,7 @@
 from sys import exit as sysexit
-from pyspark.sql import DataFrame
+from pyspark.sql import DataFrame, SparkSession
 from sqlalchemy.engine import Engine
+import pandas as pd
 
 # Create table and insert dataframe in sqlite
 def df_to_sql(df: DataFrame, engine: Engine):
@@ -14,10 +15,14 @@ def df_to_sql(df: DataFrame, engine: Engine):
     except Exception as e:
         sysexit(f"error loading dataframe into sqlite: {e}")
 
-def write_df(df: DataFrame, format: str, path: str) -> None:
+def write_df(df: DataFrame | pd.DataFrame, spark: SparkSession, format: str, path: str) -> None:
     try:
+        if isinstance(df, pd.DataFrame):
+            print("Converting Pandas dataframe to PySpark dataframe...")
+            df = spark.createDataFrame(df)
+            print("Done converting!")
         print(f"Inserting dataframe to {path}...")
-        df.write.format(format).option('header', 'true').mode('overwrite').save(path=path)
+        df.write.format(format).option('header', 'true').mode('append').save(path=path)
         print("Successfully inserted!")
     except Exception as e:
         sysexit(f"error inserting dataframe in {path}: {e}")
