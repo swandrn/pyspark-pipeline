@@ -9,7 +9,7 @@ from pyspark.sql import SparkSession
 import pandas as pd
 from sqlalchemy import create_engine
 
-class TestExtract(unittest.TestCase):
+class TestToSql(unittest.TestCase):
 
     @classmethod
     def setUpClass(self):
@@ -30,9 +30,9 @@ class TestExtract(unittest.TestCase):
         self.spark._jsc.hadoopConfiguration().set("fs.s3a.impl","org.apache.hadoop.fs.s3a.S3AFileSystem")
         self.spark._jsc.hadoopConfiguration().set("fs.s3a.endpoint", "s3.eu-north-1.amazonaws.com")
 
-        self.df = extract.read_csv(self.spark, paths.RAW_CSV).limit(20)
+        self.df = extract.read_csv(self.spark, paths.TEST_CSV).limit(20)
 
-    def setUp(self) -> None:
+    def setUp(self):
         db_name = "test_credit_cards"
         print(f"Attempting to create SQLite database {db_name}...")
         self.engine = create_engine(f"sqlite:///{db_name}.db")
@@ -56,8 +56,56 @@ class TestExtract(unittest.TestCase):
             load.df_to_sql(df, None)
 
         
-    def tearDown(self) -> None:
+    def tearDown(self):
         Path.unlink(r"test_credit_cards.db", missing_ok=True)
+
+    @classmethod
+    def tearDownClass(self):
+        self.spark.stop()
+
+class TestWrite(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(self):
+        print("Creating a Spark session...")  
+        self.spark = SparkSession.builder \
+        .master("local[*]") \
+        .appName("credit_cards") \
+        .config('spark.local.dir', '/tmp/spark-temp') \
+        .config('spark.jars.packages', 'org.apache.hadoop:hadoop-aws:3.3.6,org.apache.hadoop:hadoop-common:3.3.6,com.amazonaws:aws-java-sdk-bundle:1.12.367') \
+        .config('spark.driver.memory', '2g') \
+        .config('spark.network.timeout', '36000s') \
+        .config('spark.executor.heartbeatInterval', '3600s') \
+        .getOrCreate()
+        print("Created!")
+
+        self.spark._jsc.hadoopConfiguration().set("fs.s3a.access.key", sparkenv.ACCESS_KEY_ID)
+        self.spark._jsc.hadoopConfiguration().set("fs.s3a.secret.key", sparkenv.SECRET_ACCESS_KEY)
+        self.spark._jsc.hadoopConfiguration().set("fs.s3a.impl","org.apache.hadoop.fs.s3a.S3AFileSystem")
+        self.spark._jsc.hadoopConfiguration().set("fs.s3a.endpoint", "s3.eu-north-1.amazonaws.com")
+
+        self.df = extract.read_csv(self.spark, paths.TEST_CSV).limit(20)
+
+    def test_write_df_as_csv(self):
+        df = self.df
+        load.write_df(df=df, spark=self.spark, format='csv', path=paths.DEST_TEST)
+    
+    def test_write_df_as_json(self):
+        df = self.df
+        load.write_df(df=df, spark=self.spark, format='json', path=paths.DEST_TEST)
+    
+    def test_write_df_as_parquet(self):
+        df = self.df
+        load.write_df(df=df, spark=self.spark, format='parquet', path=paths.DEST_TEST)
+
+    def test_write_df_pandas(self):
+        df = self.df
+        df = df.toPandas()
+        load.write_df(df=df, spark=self.spark, format='csv', path=paths.DEST_TEST)
+    
+    @classmethod
+    def tearDownClass(self):
+        self.spark.stop()
 
 if __name__ == '__main__':
     unittest.main()
