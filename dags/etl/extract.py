@@ -5,7 +5,7 @@ import threading
 from queue import Queue
 
 MAX_WORKERS = 5
-pool = threading.BoundedSemaphore(MAX_WORKERS)
+consumers = threading.BoundedSemaphore(MAX_WORKERS)
 
 def read_csv(spark: SparkSession, csv: str) -> DataFrame:
     try:
@@ -20,7 +20,7 @@ def read_csv(spark: SparkSession, csv: str) -> DataFrame:
 
 def call_random_user(url: str, q: Queue, retry: bool = False):
     try:
-        with pool:
+        with consumers:
             resp = requests.get(url)
             if not resp.status_code == 200:
                 resp.raise_for_status()

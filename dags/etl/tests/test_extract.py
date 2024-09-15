@@ -73,7 +73,7 @@ class TestApiCall(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         MAX_WORKERS = 1
-        self.pool = threading.BoundedSemaphore(MAX_WORKERS)
+        self.consumers = threading.BoundedSemaphore(MAX_WORKERS)
         self.q = Queue()
     
     @responses.activate
