@@ -25,7 +25,7 @@ with DAG(
     etl_pipeline = SparkSubmitOperator(
         task_id='etl_pipeline',
         name='credit_cards',
-        application='./dags/main.py',
+        application='./dags/pyspark_etl_main.py',
         conn_id='spark_default',
         conf=spark_conf,
         total_executor_cores='1',
