@@ -17,10 +17,9 @@ def drop_columns(df: DataFrame, *columns : str) -> DataFrame:
     except Exception as e:
         sysexit(f"error dropping columns: {e}")
 
-def user_json_to_df(json) -> pd.DataFrame:
+def user_json_to_df(list_users: list) -> pd.DataFrame:
     try:
-        json = pd.json_normalize(json, sep="_")
-        df = pd.DataFrame.from_dict(json, orient='columns')
+        df = pd.json_normalize(data=list_users, sep='_', errors='ignore')
         df.rename(columns={'nat': 'nationality',
                         'name_first': 'first_name',
                         'name_last': 'last_name',
@@ -43,4 +42,4 @@ def user_json_to_df(json) -> pd.DataFrame:
                         inplace=True),
         return df
     except Exception as e:
-        sysexit(f"error converting json to datafram: {e}")
+        sysexit(f"error converting json to dataframe: {e}")
