@@ -1,5 +1,5 @@
 from sys import exit as sysexit
-import sparkenv
+from etl import sparkenv
 from pyspark.sql import DataFrame, SparkSession
 import requests
 import threading
@@ -7,7 +7,7 @@ from queue import Queue
 import boto3
 from botocore.exceptions import ClientError
 
-MAX_WORKERS = 5
+MAX_WORKERS = 3
 consumers = threading.BoundedSemaphore(MAX_WORKERS)
 
 def read_csv(spark: SparkSession, csv: str) -> DataFrame:
@@ -27,8 +27,8 @@ def call_random_user(url: str, q: Queue, retry: bool = False):
             resp = requests.get(url)
             if not resp.status_code == 200:
                 resp.raise_for_status()
-            user_json = resp.json()["results"][0]
-            q.put(user_json)
+            users_json = resp.json()["results"]
+            q.put(users_json)
     except requests.Timeout as e:
         if retry == True:
             q.put(f'error fetching {url}: {e}')
@@ -52,16 +52,3 @@ def s3_key_exists(bucket: str, key: str) -> bool:
             return False
         else:
             sysexit(f'error fetching {key} in {bucket}: {e}')
-
-# threads = []
-# users_json = []
-
-# for i in range(10):
-#     threads.append(threading.Thread(target=call_random_user, args=['https://randomuser.me/api/1.4/?exc=id']))
-
-# for thread in threads:
-#     thread.start()
-#     users_json.append(q.get())
-
-# for thread in threads:
-#     thread.join()
