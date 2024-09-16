@@ -1,5 +1,5 @@
 from etl import paths
-from etl import sparkenv
+from dags.etl import awsenv
 from etl import extract as e
 from etl import transform as t
 from etl import load as l
@@ -15,8 +15,8 @@ spark = SparkSession.builder \
 print("Created!")
 
 print("Setting AWS configurations...")
-spark._jsc.hadoopConfiguration().set("fs.s3a.access.key", sparkenv.ACCESS_KEY_ID)
-spark._jsc.hadoopConfiguration().set("fs.s3a.secret.key", sparkenv.SECRET_ACCESS_KEY)
+spark._jsc.hadoopConfiguration().set("fs.s3a.access.key", awsenv.ACCESS_KEY_ID)
+spark._jsc.hadoopConfiguration().set("fs.s3a.secret.key", awsenv.SECRET_ACCESS_KEY)
 spark._jsc.hadoopConfiguration().set("fs.s3a.impl","org.apache.hadoop.fs.s3a.S3AFileSystem")
 spark._jsc.hadoopConfiguration().set("fs.s3a.endpoint", "s3.eu-north-1.amazonaws.com")
 print("Configurations set!")

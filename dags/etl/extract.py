@@ -1,5 +1,5 @@
 from sys import exit as sysexit
-from etl import sparkenv
+from dags.etl import awsenv
 from pyspark.sql import DataFrame, SparkSession
 import requests
 import threading
@@ -38,8 +38,8 @@ def call_random_user(url: str, q: Queue, retry: bool = False):
         q.put(f'error fetching {url}: {e}')
 
 def s3_key_exists(bucket: str, key: str) -> bool:
-    session = boto3.Session(aws_access_key_id=sparkenv.ACCESS_KEY_ID,
-                            aws_secret_access_key=sparkenv.SECRET_ACCESS_KEY,
+    session = boto3.Session(aws_access_key_id=awsenv.ACCESS_KEY_ID,
+                            aws_secret_access_key=awsenv.SECRET_ACCESS_KEY,
                             )
     s3 = session.resource('s3',
                         region_name='eu-north-1',

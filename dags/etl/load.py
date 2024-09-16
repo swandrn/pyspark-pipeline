@@ -1,5 +1,5 @@
 from sys import exit as sysexit
-from etl import sparkenv
+from dags.etl import awsenv
 from pyspark.sql import DataFrame, SparkSession
 from sqlalchemy.engine import Engine
 import pandas as pd
@@ -35,8 +35,8 @@ def pandas_df_to_s3(df: pd.DataFrame, bucket: str, key: str):
         csv_buffer = StringIO()
         df.to_csv(csv_buffer, index=False, header=True)
 
-        session = boto3.Session(aws_access_key_id=sparkenv.ACCESS_KEY_ID,
-                                aws_secret_access_key=sparkenv.SECRET_ACCESS_KEY,
+        session = boto3.Session(aws_access_key_id=awsenv.ACCESS_KEY_ID,
+                                aws_secret_access_key=awsenv.SECRET_ACCESS_KEY,
                                 )
         s3 = session.resource('s3',
                             region_name='eu-north-1',

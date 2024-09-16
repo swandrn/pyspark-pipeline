@@ -1,5 +1,5 @@
 import unittest
-from dags.etl import sparkenv
+from dags.etl import awsenv
 from dags.etl import extract
 from dags.etl import transform
 from dags.etl import load
@@ -25,8 +25,8 @@ class TestToSql(unittest.TestCase):
         .getOrCreate()
         print("Created!")
 
-        self.spark._jsc.hadoopConfiguration().set("fs.s3a.access.key", sparkenv.ACCESS_KEY_ID)
-        self.spark._jsc.hadoopConfiguration().set("fs.s3a.secret.key", sparkenv.SECRET_ACCESS_KEY)
+        self.spark._jsc.hadoopConfiguration().set("fs.s3a.access.key", awsenv.ACCESS_KEY_ID)
+        self.spark._jsc.hadoopConfiguration().set("fs.s3a.secret.key", awsenv.SECRET_ACCESS_KEY)
         self.spark._jsc.hadoopConfiguration().set("fs.s3a.impl","org.apache.hadoop.fs.s3a.S3AFileSystem")
         self.spark._jsc.hadoopConfiguration().set("fs.s3a.endpoint", "s3.eu-north-1.amazonaws.com")
 
@@ -79,8 +79,8 @@ class TestWrite(unittest.TestCase):
         .getOrCreate()
         print("Created!")
 
-        self.spark._jsc.hadoopConfiguration().set("fs.s3a.access.key", sparkenv.ACCESS_KEY_ID)
-        self.spark._jsc.hadoopConfiguration().set("fs.s3a.secret.key", sparkenv.SECRET_ACCESS_KEY)
+        self.spark._jsc.hadoopConfiguration().set("fs.s3a.access.key", awsenv.ACCESS_KEY_ID)
+        self.spark._jsc.hadoopConfiguration().set("fs.s3a.secret.key", awsenv.SECRET_ACCESS_KEY)
         self.spark._jsc.hadoopConfiguration().set("fs.s3a.impl","org.apache.hadoop.fs.s3a.S3AFileSystem")
         self.spark._jsc.hadoopConfiguration().set("fs.s3a.endpoint", "s3.eu-north-1.amazonaws.com")
 
