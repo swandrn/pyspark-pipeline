@@ -1,5 +1,6 @@
 from sys import exit as sysexit
 from dags.etl import awsenv
+from dags.etl import config
 from pyspark.sql import DataFrame, SparkSession
 import requests
 import threading
@@ -7,8 +8,7 @@ from queue import Queue
 import boto3
 from botocore.exceptions import ClientError
 
-MAX_WORKERS = 3
-consumers = threading.BoundedSemaphore(MAX_WORKERS)
+consumers = threading.BoundedSemaphore(config.MAX_WORKERS)
 
 def read_csv(spark: SparkSession, csv: str) -> DataFrame:
     try:

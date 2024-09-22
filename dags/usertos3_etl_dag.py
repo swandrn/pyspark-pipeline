@@ -2,6 +2,7 @@ from etl import extract
 from etl import transform
 from etl import load
 from etl import paths
+from etl import config
 import threading
 from queue import Queue
 from airflow import DAG
@@ -13,10 +14,9 @@ def repeatedly_call_users(iter: int) -> list:
     q = Queue()
     threads = []
     users_json = []
-    RESULTS = 50
 
     for _ in range(iter):
-        threads.append(threading.Thread(target=extract.call_random_user, args=[f'https://randomuser.me/api/1.4/?exc=id&results={RESULTS}&nat=gb', q]))
+        threads.append(threading.Thread(target=extract.call_random_user, args=[f'https://randomuser.me/api/1.4/?exc=id&results={config.RESULTS}&nat=gb', q]))
 
     for thread in threads:
         thread.start()
