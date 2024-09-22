@@ -2,6 +2,7 @@ from sys import exit as sysexit
 from etl import awsenv
 from etl import config
 from pyspark.sql import DataFrame, SparkSession
+import time
 import requests
 import threading
 from queue import Queue
@@ -25,10 +26,18 @@ def call_random_user(url: str, q: Queue, retry: bool = False):
     try:
         with consumers:
             resp = requests.get(url)
+            if resp.status_code == 429:
+                raise requests.ConnectionError
             if not resp.status_code == 200:
                 resp.raise_for_status()
             users_json = resp.json()["results"]
             q.put(users_json)
+            time.sleep(config.RATE_LIMIT)
+    except requests.ConnectionError as e:
+        if retry == True:
+            q.put(f'error fetching {url}: {e}')
+        time.sleep(1)
+        call_random_user(url=url, q=q, retry=True)
     except requests.Timeout as e:
         if retry == True:
             q.put(f'error fetching {url}: {e}')
