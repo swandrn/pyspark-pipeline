@@ -13,27 +13,26 @@ from airflow.operators.bash import BashOperator
 
 def repeatedly_call_users(iter: int) -> list:
     q = Queue()
-    threads = []
+    tasks = []
     users_json = []
     errors = []
 
     for _ in range(iter):
-        threads.append(threading.Thread(target=extract.call_random_user, args=[f'https://randomuser.me/api/1.4/?exc=id&results={config.RESULTS}&nat=gb', q]))
+        tasks.append(threading.Thread(target=extract.call_random_user, args=[f'https://randomuser.me/api/1.4/?exc=id&results={config.RESULTS}&nat=gb', q]))
 
-    for thread in threads:
-        thread.start()
+    for task in tasks:
+        task.start()
         res = q.get()
         if isinstance(res, list):
             users_json = users_json + res
         else:
             errors.append(res)
 
-    for thread in threads:
-        thread.join()
+    for task in tasks:
+        task.join()
 
     if errors:
-        for err in errors:
-            logging.warning(f'{err}\n')
+        logging.info(f'{len(errors)} errors were raised\n')
     return users_json
 
 with DAG(
@@ -58,7 +57,7 @@ with DAG(
         do_xcom_push=True,
         python_callable=repeatedly_call_users,
         op_kwargs={
-            'iter': '100'
+            'iter': config.API_CALL
         },
     )
 
