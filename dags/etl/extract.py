@@ -1,6 +1,6 @@
 from sys import exit as sysexit
-from dags.etl import awsenv
-from dags.etl import config
+from etl import awsenv
+from etl import config
 from pyspark.sql import DataFrame, SparkSession
 import requests
 import threading

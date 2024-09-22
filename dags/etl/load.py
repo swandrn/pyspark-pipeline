@@ -1,5 +1,5 @@
 from sys import exit as sysexit
-from dags.etl import awsenv
+from etl import awsenv
 from pyspark.sql import DataFrame, SparkSession
 from sqlalchemy.engine import Engine
 import pandas as pd
