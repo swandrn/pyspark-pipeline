@@ -3,6 +3,7 @@ from etl import transform
 from etl import load
 from etl import paths
 from etl import config
+from collections import Counter
 import logging
 import threading
 from queue import Queue
@@ -32,7 +33,10 @@ def repeatedly_call_users(iter: int) -> list:
         task.join()
 
     if errors:
-        logging.info(f'{len(errors)} errors were raised\n')
+        unique_errors = Counter(errors)
+        for err in unique_errors:
+            logging.info(f'{err} has {unique_errors[err]} occurences')
+            
     return users_json
 
 with DAG(
