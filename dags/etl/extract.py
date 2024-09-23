@@ -25,6 +25,7 @@ def read_csv(spark: SparkSession, csv: str) -> DataFrame:
 def call_random_user(url: str, q: Queue, retry: bool = False):
     try:
         with consumers:
+            time.sleep(config.RATE_LIMIT)
             resp = requests.get(url)
             if resp.status_code == 429:
                 raise requests.ConnectionError
@@ -32,11 +33,10 @@ def call_random_user(url: str, q: Queue, retry: bool = False):
                 resp.raise_for_status()
             users_json = resp.json()["results"]
             q.put(users_json)
-            time.sleep(config.RATE_LIMIT)
     except requests.ConnectionError as e:
         if retry == True:
-            q.put(f'error fetching {url}: {e}')
-        time.sleep(1)
+            q.put(f'too many requests at {url}: {e}')
+        time.sleep(60)
         call_random_user(url=url, q=q, retry=True)
     except requests.Timeout as e:
         if retry == True:
